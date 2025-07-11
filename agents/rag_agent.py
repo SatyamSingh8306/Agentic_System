@@ -20,7 +20,7 @@ def retrieve(query : Annotated[Optional[str], "The formatted best query to searc
         "query": query,
         "collection": "1234"
         }
-    ans = requests.post(url=CHAT_URL,params=request)
+    ans = requests.post(url=CHAT_URL,json=request)
     return ans.json()["answer"]
 
 

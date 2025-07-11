@@ -1,23 +1,28 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.responses import JSONResponse
+from fastapi import Body
 from langchain.schema.runnable import RunnableConfig
-from typing import Annotated, Literal, List, Dict,Optional, Any
+from agents.supervisor import graph
+from langgraph.checkpoint.memory import MemorySaver
+
 router = APIRouter()
-from agents.supervisor import final_agent
+memory = MemorySaver()
+agent = graph.compile(checkpointer=memory)
 
 @router.post("/chat")
-async def chatAgenticSystem(user_query: Optional[Dict[Any, Any]]):
-    
+async def chat_agentic_system(user_query: str = Body(..., embed=True)):
     formatted_query = {
-        "message" : [user_query],
-        "category" : []
+        "message": [user_query],
+        "categories": []
     }
-    agent = final_agent
+
     config = RunnableConfig(
-            configurable={
-                "thread_id" : "1"
-            }
-        )
-    response = agent.invoke(formatted_query,config=config)
+        configurable={
+            "thread_id": "1"
+        }
+    )
     
-    return JSONResponse(content={"content" : response["message"][-2].content}, status_code=200)
+    # Check if your `agent.invoke` is async; if so, use await
+    response = await agent.ainvoke(formatted_query, config=config)
+    
+    return JSONResponse(content={"content": response["message"][-2].content}, status_code=200)

@@ -164,14 +164,14 @@ template = ChatPromptTemplate(
 )
 
 
-__llm = ChatGroq(
-    model = "gemma2-9b-it"
-)
-
-# __llm = ChatOllama(
-#     model = "qwen3:14b",
-#     base_url = "https://a59ulrlntmv161-11434.proxy.runpod.net/"
+# __llm = ChatGroq(
+#     model = "gemma2-9b-it"
 # )
+
+__llm = ChatOllama(
+    model = "gemma2:9b",
+    base_url = "https://a59ulrlntmv161-11434.proxy.runpod.net/"
+)
 
 llm = __llm.with_structured_output(SupervisorResponse)
 classification_chain = template | llm
