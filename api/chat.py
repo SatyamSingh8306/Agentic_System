@@ -1,10 +1,10 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.responses import JSONResponse
 from typing import Annotated, Literal, List, Dict,Optional, Any
-router = APIRouter(prefix="/chat")
+router = APIRouter()
 from agents.supervisor import final_agent
 
-@router.post("/")
+@router.post("/chat")
 async def chatAgenticSystem(user_query: Optional[Dict[Any, Any]]):
     
     formatted_query = {
