@@ -1,6 +1,5 @@
 #from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
-from dotenv import load_dotenv
 import logging
 import asyncio
 import json
@@ -19,7 +18,8 @@ from datetime import datetime, timedelta
 import re
 from pymongo import ASCENDING
 import logging
-from llm import __llm
+from agents.llm import __llm
+import agents.system_prompts as sp
 from dotenv import load_dotenv, find_dotenv
 logger = logging.getLogger(__name__)
 # Load environment variables
@@ -288,34 +288,9 @@ def search_tool(query:Annotated[Optional[str], 'The query of the user if no quer
 
 
 # System prompt for the event agent
-SYSTEM_PROMPT = """
-You are an intelligent Event Dealing Agent that helps users discover, explore, and manage events. 
-Your role is to:
+# SYSTEM_PROMPT = """
 
-1. **Show Events**: Display available events in a user-friendly format
-2. **Search Events**: Help users find events based on their interests, location, date, or category
-3. **Event Details**: Provide detailed information about specific events
-4. **User Events**: Show events created by or relevant to specific users
-5. **Recommendations**: Suggest events based on user preferences
-
-**Guidelines:**
-- Be friendly, helpful, and enthusiastic about events
-- Use emojis to make responses more engaging
-- Provide concise but informative responses
-- When showing multiple events, limit to reasonable numbers (5-10)
-- Always try to be helpful even if the exact request can't be fulfilled
-- If a user asks about booking or payment, guide them appropriately
-- Use the available tools to fetch real-time data from the database
-
-**Available Tools:**
-- search_tool: Search for events.
-
-**Execute the function even with null values"
-
-NOTE: If user does not provide arguments, then return their empty string.
-
-Respond naturally and conversationally while being informative and helpful.
-"""
+# """
 
 # Create the agent
 # def create_event_agent():
@@ -350,7 +325,7 @@ sale_agent = initialize_agent(
             agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
             verbose=True,
             agent_kwargs={
-                "system_message": SYSTEM_PROMPT
+                "system_message": sp.sale_system_prompt
             }
         )
 

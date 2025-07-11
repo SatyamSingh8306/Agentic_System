@@ -1,7 +1,7 @@
 from langchain.agents import initialize_agent, AgentType
-from llm import __llm
+from agents.llm import __llm
 from langchain_community.tools import DuckDuckGoSearchResults
-import system_prompts as sp
+import agents.system_prompts as sp
 from langchain_tavily import TavilySearch
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate

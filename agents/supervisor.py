@@ -1,4 +1,4 @@
-from chains import classification_chain as chain
+from agents.chains import classification_chain as chain
 from langgraph.graph import StateGraph, END, add_messages
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain.schema.runnable import RunnableConfig
@@ -9,9 +9,9 @@ from typing import TypedDict, List, Annotated, Literal,Optional
 import logging
 
 
-from web_agent import web_agent
-from sale_agent import sale_agent
-from rag_agent import rag_agent
+from agents.web_agent import web_agent
+from agents.sale_agent import sale_agent
+from agents.rag_agent import rag_agent
 
 logging.basicConfig(level = logging.INFO)
 
@@ -218,10 +218,10 @@ final_agent = graph.compile(checkpointer=memory)
 # Example usage:
 if __name__ == "__main__":
     # Test the graph
-    initial_state = BaseState(
-        message= [],
-        categories = []
-    )
+    initial_state = {
+        "message": [],
+        "categories": []
+    }
 
     while True:
         user = input("Enter your Questions : ")

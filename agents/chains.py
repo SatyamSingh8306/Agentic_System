@@ -5,6 +5,7 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel , Field
 from typing import Annotated, Literal
 from dotenv import load_dotenv
+import agents.system_prompts as sp
 load_dotenv()
 
 class SupervisorResponse(BaseModel):
@@ -157,33 +158,7 @@ class SupervisorResponse(BaseModel):
 
 template = ChatPromptTemplate(
     [
-        ("system", """
-You are an expert Supervisor AI responsible for intelligent query routing. Your primary task is to analyze incoming user queries and classify them into exactly one of the following specialized agent categories. 
-
-**CLASSIFICATION RULES:**
-- Always return ONLY the agent category name (e.g., "content_generation_agent")
-- Never provide explanations, reasoning, or multiple options
-- If uncertain, default to "content_generation_agent"
-- Consider the user's primary intent, not secondary aspects
-
-**AGENT CATEGORIES:**
-**1. search_tool_agent**
-- Purpose: Real-time information, current events, recent news, time-sensitive data
-- Triggers: Keywords like "latest", "current", "recent", "news", "today", "this week"
-- Examples: "What's the latest news about Tesla?", "Current weather in Paris", "Recent developments in AI", "Who won yesterday's game?"
-
-**2. rag_agent**
-- Purpose: Document retrieval, knowledge base queries, specific information lookup
-- Triggers: Requests for specific documentation, company information, technical specifications
-- Examples: "What does our policy say about...", "Find information about product X", "Show me the documentation for..."
-
-**3. sales_agent**
-- Purpose: Product inquiries, sales support, purchase assistance
-- Triggers: Product interest, pricing questions, purchase intent
-- Examples: "I want to buy...", "What's the price of...", "Can you help me choose a product?", "Product recommendations"
-
-Analyze the query and respond with only the appropriate agent category name.
-"""),
+        ("system", f"{sp.supervisor_prompt}"),
         ("human", "{query}")
     ]
 )
