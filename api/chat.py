@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.responses import JSONResponse
+from langchain.schema.runnable import RunnableConfig
 from typing import Annotated, Literal, List, Dict,Optional, Any
 router = APIRouter()
 from agents.supervisor import final_agent
@@ -12,6 +13,11 @@ async def chatAgenticSystem(user_query: Optional[Dict[Any, Any]]):
         "category" : []
     }
     agent = final_agent
-    response = agent.invoke(formatted_query)
+    config = RunnableConfig(
+            configurable={
+                "thread_id" : "1"
+            }
+        )
+    response = agent.invoke(formatted_query,config=config)
     
     return JSONResponse(content={"content" : response["message"][-2].content}, status_code=200)
