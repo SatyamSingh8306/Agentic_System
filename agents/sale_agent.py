@@ -326,28 +326,20 @@ def search_tool(
 #     except ImportError:
 #         logger.error("Could not import LLM. Please ensure llm.py is available with __llm defined.")
 #         return None
-prompt = ChatPromptTemplate(
-    [
-        ("system", f"{sp.sale_system_prompt}"),
-        ("human", "{query}")
-    ]
-) 
-chain =  prompt | __llm
 
-sale_agent = initialize_agent(
-            llm= __llm,
-            tools=[
-                search_tool
-            ],
-            agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-            verbose=True,
-            agent_kwargs={
-                "prefix": sp.sale_system_prompt
-            },
-            handle_parsing_errors = True,
-            max_iteration = 2,
-            early_stopping_method = "force"
-        )
+sale_agent = agent = initialize_agent(
+    llm=__llm,
+    tools=[search_tool],  # if needed
+    agent=AgentType.OPENAI_FUNCTIONS,
+    verbose=True,
+    handle_parsing_errors=True,
+    max_iterations=1,  # optional, default fine
+    agent_kwargs={
+        "system_message": sp.sale_system_prompt
+    },
+    early_stopping_method="force"
+)
+
 
 async def sale_agent_answer(query : str):
     agent = sale_agent
@@ -368,7 +360,7 @@ if __name__ == "__main__":
         
         for query in test_queries:
             print(f"\n🔍 Query: {query}")
-            response = chain.invoke({"query" :query})
+            response = agent.invoke(query)
             # agent.invoke(query)
             print(f"🤖 Response: {response}")
             # ans = search_tool.invoke({"query" : "", "city" : "lucknow", "date" : " ", "price" : "", "top_rated" : False})

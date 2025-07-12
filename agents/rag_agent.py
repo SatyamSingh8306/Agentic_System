@@ -27,13 +27,13 @@ def retrieve(query : Annotated[Optional[str], "The formatted best query to searc
 agent = initialize_agent(
     llm= __llm,
     tools=[retrieve],
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    agent=AgentType.OPENAI_FUNCTIONS,
     verbose = True,
     handle_parsing_errors = True,
-    max_iteration = 2,
+    max_iteration = 1,
     early_stopping_method = "force",
     agent_kwargs={
-        "prefix" : sp.rag_system_prompt
+        "system_message" : sp.rag_system_prompt
     }
 )
 

@@ -24,12 +24,12 @@ tool = TavilySearchResults(tavily_api_key = getenv("TAVILY_API_KEY"), max_result
 agent = initialize_agent(
     llm = __llm,
     tools=[tool],
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    agent=AgentType.OPENAI_FUNCTIONS,
     verbose = True,
     handle_parsing_errors = True,
-    max_iteration = 2,
+    max_iteration = 1,
     agent_kwargs={
-            "prefix": sp.sale_system_prompt
+            "system_message": sp.sale_system_prompt
     },
     early_stopping_method = "force"
 )
