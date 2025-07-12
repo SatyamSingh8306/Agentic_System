@@ -30,7 +30,7 @@ def categories(state):
     if isinstance(message_content, list):
         message_content = message_content[-1] if message_content else ""
     logging.info(f"Supervisor Content {message_content}")
-    ans = ""
+    ans = {"category" : "sales_agent"}
     try:
         ans = chain.invoke({"query": message_content}).model_dump()
         logging.info(f"response of supervisor {ans}")
