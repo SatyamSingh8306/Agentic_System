@@ -25,10 +25,10 @@ class BaseState(TypedDict):
 def categories(state):
     # Extract the actual message content for the chain
     logging.info(f"State in supervisor node --> {state}")
-    message_content = state.get("message", "")[-1]
-    print()
-    if isinstance(message_content, list):
-        message_content = message_content[-1] if message_content else ""
+    message_content = state.get("message", "")
+    print(message_content)
+    # if isinstance(message_content, list):
+    #     message_content = message_content[-1] if message_content else ""
     logging.info(f"Supervisor Content {message_content}")
     ans = {"category" : "sales_agent"}
     try:
@@ -238,9 +238,9 @@ if __name__ == "__main__":
         print(result)
         # for msg in result["message"]:
         #     initial_state["message"].append(msg.content)
-        initial_state["message"].append(result["message"][-2].content)
-        for msg in result["categories"]:
-            initial_state["categories"].append(msg.content)
+        # initial_state["message"].append(result["message"][-2].content)
+        # for msg in result["categories"]:
+        #     initial_state["categories"].append(msg.content)
         
         print("Final result:", result["categories"][-1].content)
         print(initial_state)

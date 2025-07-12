@@ -207,10 +207,12 @@ supervisor_prompt = """You are an expert Supervisor AI responsible for intellige
 Analyze the query and respond with only the appropriate agent category name."""
 
 def update_prompts(new_prompt, role):
-    global supervisor_prompt, rag_system_prompt, sale_system_prompt
+    global supervisor_prompt, rag_system_prompt, sale_system_prompt, web_system_prompt
     if role == "supervisor":
         supervisor_prompt = new_prompt
     elif role == "rag":
         rag_system_prompt = new_prompt
     elif role == "sales":
         sale_system_prompt = new_prompt
+    elif role == "web":
+        web_system_prompt = new_prompt

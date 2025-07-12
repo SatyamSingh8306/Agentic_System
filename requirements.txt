@@ -13,3 +13,5 @@ langchain-huggingface
 pymongo
 langchain-tavily
 redis
+python-dateutil
+sentence-transformers
