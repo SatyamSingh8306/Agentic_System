@@ -25,9 +25,9 @@ class UserQuery(BaseModel):
 async def chat_agentic_system(user_query: UserQuery = Body(...)):
     lc_messages = []
     for msg in user_query.messages:
-        if msg.role == "human":
+        if msg.role == "user":
             lc_messages.append(HumanMessage(content=msg.content))
-        elif msg.role == "ai":
+        elif msg.role == "assistant":
             lc_messages.append(AIMessage(content=msg.content))
     
     config = RunnableConfig(
