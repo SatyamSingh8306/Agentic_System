@@ -33,8 +33,8 @@ redis_client = Redis(
     password=getenv('REDIS_PASSWORD'),
 )
 
-embedding_model = HuggingFaceEmbeddings(model="BAAI/bge-m3")
-# embedding_model = None
+# embedding_model = HuggingFaceEmbeddings(model="BAAI/bge-m3")
+embedding_model = None
 similarity_threshold = 0.75
 
 client = MongoClient(getenv('DB'))
@@ -326,16 +326,23 @@ def search_tool(
 #     except ImportError:
 #         logger.error("Could not import LLM. Please ensure llm.py is available with __llm defined.")
 #         return None
+prompt = ChatPromptTemplate(
+    [
+        ("system", f"{sp.sale_system_prompt}"),
+        ("human", "{query}")
+    ]
+) 
+chain =  prompt | __llm
 
 sale_agent = initialize_agent(
-            llm=__llm,
+            llm= __llm,
             tools=[
                 search_tool
             ],
             agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
             verbose=True,
             agent_kwargs={
-                "system_message": sp.sale_system_prompt
+                "prefix": sp.sale_system_prompt
             },
             handle_parsing_errors = True,
             max_iteration = 2,
@@ -356,16 +363,16 @@ if __name__ == "__main__":
         
         # Test queries
         test_queries = [
-            "Show me some events from lucknow",
+            "who are you?",
         ]
         
         for query in test_queries:
             print(f"\n🔍 Query: {query}")
-            response = agent.invoke(query)
+            response = chain.invoke({"query" :query})
             # agent.invoke(query)
             print(f"🤖 Response: {response}")
             # ans = search_tool.invoke({"query" : "", "city" : "lucknow", "date" : " ", "price" : "", "top_rated" : False})
-            print(ans)
+            # print(ans)
             
     main()
 

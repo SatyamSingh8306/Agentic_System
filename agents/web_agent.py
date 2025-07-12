@@ -28,6 +28,9 @@ agent = initialize_agent(
     verbose = True,
     handle_parsing_errors = True,
     max_iteration = 2,
+    agent_kwargs={
+            "prefix": sp.sale_system_prompt
+    },
     early_stopping_method = "force"
 )
 
@@ -47,5 +50,5 @@ def process_search(query):
 web_agent = process_search
 
 if __name__ == "__main__":
-    ans = web_agent("who is pm of india?")
+    ans = web_agent("who are you?")
     print(ans)

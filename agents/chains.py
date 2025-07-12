@@ -165,7 +165,7 @@ template = ChatPromptTemplate(
 
 
 __llm = ChatGroq(
-    model = "gemma2-9b-it"
+    model = "deepseek-r1-distill-llama-70b"
 )
 
 # __llm = ChatOllama(

@@ -24,13 +24,6 @@ def retrieve(query : Annotated[Optional[str], "The formatted best query to searc
     return ans.json()["answer"]
 
 
-template = ChatPromptTemplate(
-    [
-        ("ai" ,f"{sp.rag_system_prompt}"),
-        ("human", "{query}")
-    ]
-)
-
 agent = initialize_agent(
     llm= __llm,
     tools=[retrieve],
@@ -38,12 +31,15 @@ agent = initialize_agent(
     verbose = True,
     handle_parsing_errors = True,
     max_iteration = 2,
-    early_stopping_method = "force"
+    early_stopping_method = "force",
+    agent_kwargs={
+        "prefix" : sp.rag_system_prompt
+    }
 )
 
-rag_agent = template | agent
+rag_agent = agent
 
 if __name__ == "__main__":
-    ans = rag_agent.invoke({"query" : "who is pm of india?"})
+    ans = rag_agent.invoke("who are you?")
     print(ans)
 
