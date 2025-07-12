@@ -33,8 +33,8 @@ redis_client = Redis(
     password=getenv('REDIS_PASSWORD'),
 )
 
-# embedding_model = HuggingFaceEmbeddings(model="BAAI/bge-m3")
-embedding_model = None
+embedding_model = HuggingFaceEmbeddings(model="BAAI/bge-m3")
+# embedding_model = None
 similarity_threshold = 0.75
 
 client = MongoClient(getenv('DB'))
@@ -226,64 +226,74 @@ def search_event(query: Optional[str] = None, date: Optional[str] = None, price:
     return full_res
 
 @tool
-def search_tool(query:Annotated[Optional[str], 'The query of the user if no query then return "" '], 
-                city:Annotated[Optional[str], 'City of the user (has to be an actual city) if no city then return "" '], 
-                price: Annotated[Optional[str], "It can be 'under max price', 'above min price', 'min price - max price' if no price then return '' "], 
-                date: Annotated[Optional[str], "date (string, optional) – Event date (YYYY-MM-DD) or (YYYY-MM-DD to YYYY-MM-DD) if no date then return '' "], 
-                top_rated: Annotated[Optional[bool], "Whether we want top rated events or not, if no top_rated then return boolean False"] = False):
+def search_tool(
+    query: Annotated[Optional[str], 'The query of the user if no query then return "" '],
+    city: Annotated[Optional[str], 'City of the user (has to be an actual city) if no city then return "" '],
+    price: Annotated[Optional[str], "It can be 'under max price', 'above min price', 'min price - max price' if no price then return '' "],
+    date: Annotated[Optional[str], "date (string, optional) – Event date (YYYY-MM-DD) or (YYYY-MM-DD to YYYY-MM-DD) if no date then return '' "],
+    top_rated: Annotated[Optional[bool], "Whether we want top rated events or not, if no top_rated then return boolean False"] = False
+):
     """
-    To search for events in based on d/f parmeters either single or multiple paramter 
-    If User haevn't enter every parameter consider null or something.
+    Search for events based on user parameters and return compact Markdown-formatted output.
     """
-    
 
-    logging.info(f"Searched with query: {query}, month: {date}, price: {price}, city: {city}, top_rated: {top_rated}")
+    logging.info(f"Searched with query: {query}, date: {date}, price: {price}, city: {city}, top_rated: {top_rated}")
 
-    query = query if query else ""
-    city = city.capitalize() if city else ""
+    # Normalize inputs
+    query = query.strip() if query else ""
+    city = city.strip().capitalize() if city else ""
     price = price if price else ""
     date = date if date else ""
-    top_rated = top_rated if top_rated else False
+    top_rated = bool(top_rated)
 
-    if query and isinstance(query, str) and query.lower() == "none" and query==" ":
-        query = ''
+    # Clean up
+    if query.lower() in ["none", ""]:
+        query = ""
+    if city.lower() in ["none", ""]:
+        city = ""
+    if 'agp' in query.lower():
+        query = ""
 
-
-    if city and isinstance(city, str) and city.lower() == "none" and city==" ":
-        city = ''
-
-
-    if isinstance(query,str) and 'agp' in query.lower():
-        query = ''
-
+    # Default date range
     if not date:
         current_date = datetime.now()
-        next_months_later = current_date + relativedelta(months=12)
-        date = f"{current_date.strftime('%Y-%m-%d')} to {next_months_later.strftime('%Y-%m-%d')}"
+        end_date = current_date + relativedelta(months=12)
+        date = f"{current_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
 
-    full_res = search_event(query=query, date=date, price=price,top_rated=top_rated)
+    full_res = search_event(query=query, date=date, price=price, top_rated=top_rated)
     logging.info(f"Search results: {len(full_res)}")
-    full_res.sort(key=lambda x: x['tickets_sold'], reverse=True)
-    if city and isinstance(city, str):
+
+    # Sort and filter
+    full_res.sort(key=lambda x: x.get('tickets_sold', 0), reverse=True)
+    if city:
         full_res = [event for event in full_res if city in event.get('theater_address', '')]
-        
-    elif city and isinstance(city, list):
-        city = city[0]
-        full_res = [event for event in full_res if city in event.get('theater_address', '')]
-    
-    filtered_results = []
-    if query and isinstance(query, str):
-    
-        filtered_results = list(filter(lambda x: x['score'] > similarity_threshold, full_res))
-        final_results = filtered_results
-        # final_ids = [event['event_id'] for event in filtered_results]
+
+    if query:
+        final_results = list(filter(lambda x: x.get('score', 0) > similarity_threshold, full_res))
     else:
-
-        # final_ids = [event['event_id'] for event in full_res]
         final_results = full_res
-    
 
-    return {"output": f"{final_results}"}
+    # Keep only important keys
+    important_keys = [
+        'event_name', 'event_date', 'event_time', 'theater_name',
+        'theater_address', 'cost', 'genre', 'city'
+    ]
+
+    # Convert to Markdown string
+    markdown_output = "### 🎟 Upcoming Events\n\n"
+    if not final_results:
+        markdown_output += "No events found based on your criteria."
+    else:
+        for i, event in enumerate(final_results, 1):
+            markdown_output += f"{i}. {event.get('event_name', 'Untitled Event')}\n"
+            markdown_output += f"-Date: {event.get('event_date', 'N/A')} at {event.get('event_time', 'N/A')}\n"
+            markdown_output += f"-Venue: {event.get('theater_name', 'Unknown')} – {event.get('theater_address', 'N/A')}\n"
+            markdown_output += f"-Cost: ₹{event.get('cost', 'N/A')}\n"
+            markdown_output += f"-Genre: {event.get('genre', 'N/A')} | City: {event.get('city', 'N/A')}\n\n"
+
+    return {
+        "output": markdown_output
+    }
 
 
 
@@ -326,7 +336,10 @@ sale_agent = initialize_agent(
             verbose=True,
             agent_kwargs={
                 "system_message": sp.sale_system_prompt
-            }
+            },
+            handle_parsing_errors = True,
+            max_iteration = 2,
+            early_stopping_method = "force"
         )
 
 async def sale_agent_answer(query : str):

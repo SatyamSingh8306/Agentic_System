@@ -7,6 +7,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.prebuilt import create_react_agent
 import logging
+from os import getenv
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,13 +19,16 @@ prompts = ChatPromptTemplate(
         ("human", "{query}")
     ]
 )
-tool = TavilySearchResults(tavily_api_key = "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")
+tool = TavilySearchResults(tavily_api_key = getenv("TAVILY_API_KEY"), max_results=2)
 
 agent = initialize_agent(
     llm = __llm,
     tools=[tool],
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose = True
+    verbose = True,
+    handle_parsing_errors = True,
+    max_iteration = 2,
+    early_stopping_method = "force"
 )
 
 

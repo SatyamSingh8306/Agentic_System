@@ -35,7 +35,10 @@ agent = initialize_agent(
     llm= __llm,
     tools=[retrieve],
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose = True
+    verbose = True,
+    handle_parsing_errors = True,
+    max_iteration = 2,
+    early_stopping_method = "force"
 )
 
 rag_agent = template | agent
