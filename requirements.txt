@@ -1,0 +1,14 @@
+langchain
+langgraph
+langchain-ollama
+langchain-groq
+langchain-community
+fastapi
+python-dotenv
+pydantic
+requests
+datetime
+asyncio
+langchain-huggingface
+pymongo
+langchain-tavily
