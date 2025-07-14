@@ -9,13 +9,13 @@ _llm = ChatGroq(
     model = "gemma2-9b-it"
 )
 
-__llm = ChatGroq(
-    model = "gemma2-9b-it",
-    temperature=0.2
-)
-
-# __llm = ChatOllama(
-#     model = getenv("OLLAMA_MODEL"),
-#     base_url= getenv("OLLAMA_BASE_URL"),
+# __llm = ChatGroq(
+#     model = "gemma2-9b-it",
 #     temperature=0.2
 # )
+
+__llm = ChatOllama(
+    model = getenv("OLLAMA_MODEL"),
+    base_url= getenv("OLLAMA_BASE_URL"),
+    temperature=0.2
+)

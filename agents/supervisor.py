@@ -23,12 +23,11 @@ class BaseState(TypedDict):
 
 
 def categories(state):
-    # Extract the actual message content for the chain
+    # Extract the actual message content for the chai
+    
     logging.info(f"State in supervisor node --> {state}")
     message_content = state.get("message", "")
     print(message_content)
-    # if isinstance(message_content, list):
-    #     message_content = message_content[-1] if message_content else ""
     logging.info(f"Supervisor Content {message_content}")
     ans = {"category" : "sales_agent"}
     try:

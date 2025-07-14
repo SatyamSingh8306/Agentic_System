@@ -227,10 +227,10 @@ def search_event(query: Optional[str] = None, date: Optional[str] = None, price:
 
 @tool
 def search_tool(
-    query: Annotated[Optional[str], 'The query of the user if no query then return "" '],
-    city: Annotated[Optional[str], 'City of the user (has to be an actual city) if no city then return "" '],
-    price: Annotated[Optional[str], "It can be 'under max price', 'above min price', 'min price - max price' if no price then return '' "],
-    date: Annotated[Optional[str], "date (string, optional) – Event date (YYYY-MM-DD) or (YYYY-MM-DD to YYYY-MM-DD) if no date then return '' "],
+    query: Annotated[Optional[str], 'The query of the user if no query then return " " '],
+    city: Annotated[Optional[str], 'City of the user (has to be an actual city) if no city then return " " '],
+    price: Annotated[Optional[str], "It can be 'under max price', 'above min price', 'min price - max price' if no price then return ' ' "],
+    date: Annotated[Optional[str], "date (string, optional) – Event date (YYYY-MM-DD) or (YYYY-MM-DD to YYYY-MM-DD) if no date then return ' ' "],
     top_rated: Annotated[Optional[bool], "Whether we want top rated events or not, if no top_rated then return boolean False"] = False
 ):
     """
@@ -330,12 +330,12 @@ def search_tool(
 sale_agent = agent = initialize_agent(
     llm=__llm,
     tools=[search_tool],  # if needed
-    agent=AgentType.OPENAI_FUNCTIONS,
+    agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     handle_parsing_errors=True,
     max_iterations=1,  # optional, default fine
     agent_kwargs={
-        "system_message": sp.sale_system_prompt
+        "prefix": sp.sale_system_prompt
     },
     early_stopping_method="force"
 )
@@ -355,7 +355,8 @@ if __name__ == "__main__":
         
         # Test queries
         test_queries = [
-            "who are you?",
+            "Suggest me Some events in Lucknow about music?",
+            "what is your name?"
         ]
         
         for query in test_queries:

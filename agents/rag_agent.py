@@ -27,7 +27,7 @@ def retrieve(query : Annotated[Optional[str], "The formatted best query to searc
 agent = initialize_agent(
     llm= __llm,
     tools=[retrieve],
-    agent=AgentType.OPENAI_FUNCTIONS,
+    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose = True,
     handle_parsing_errors = True,
     max_iteration = 1,
@@ -40,6 +40,6 @@ agent = initialize_agent(
 rag_agent = agent
 
 if __name__ == "__main__":
-    ans = rag_agent.invoke("who are you?")
+    ans = rag_agent.invoke("Check the events you have about music events?")
     print(ans)
 
