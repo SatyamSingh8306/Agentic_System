@@ -3,10 +3,23 @@ from langchain_ollama import ChatOllama
 from langchain_core.prompts import PromptTemplate , ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel , Field
-from typing import Annotated, Literal
+from typing import Annotated, Literal, List, Optional
 from dotenv import load_dotenv
 import agents.system_prompts as sp
 load_dotenv()
+
+class AgentInputFormat(BaseModel):
+    agent_name : Annotated[str, Literal[
+            "search_tool_agent", 
+            "rag_agent",
+            "sales_agent",
+            "customer_care_agent"]]
+    query : Annotated[List[str], "Queries to ask to a paricular Agent"]
+
+class UnderstandingContext(BaseModel):
+    criteria : Annotated[List[str],"A detailed List of criterion required based on user query to pass the user query"]
+    keywords : Annotated[List[str], "A detailed List of important key point mentioned in user query"]
+
 
 class SupervisorResponse(BaseModel):
     """
@@ -16,74 +29,8 @@ class SupervisorResponse(BaseModel):
     based on query intent and content analysis.
     """
     
-    # category: Annotated[
-    #     Literal[
-    #         "content_generation_agent",
-    #         "search_tool_agent", 
-    #         "event_tool_agent",
-    #         "rag_agent",
-    #         "sales_agent",
-    #         "billing_info_agent", 
-    #         "payment_order_agent",
-    #         "feedback_agent",
-    #         "analytics_agent"
-    #     ],
-    #     Field(
-    #         description="""
-    #         Categorizes the user query into one of the following specialized agent domains:
-            
-    #         • content_generation_agent: General conversations, creative writing, explanations, 
-    #           educational content that don't require real-time data or specialized tools
-              
-    #         • search_tool_agent: Queries requiring current information, recent news, 
-    #           real-time data, or web search capabilities
-              
-    #         • event_tool_agent: Event-related queries including concerts, shows, activities 
-    #           with specific location, time, or date constraints
-              
-    #         • rag_agent: Document retrieval, knowledge base queries, company-specific 
-    #           information lookup from internal sources
-              
-    #         • sales_agent: Product inquiries, purchase assistance, pricing questions, 
-    #           sales support, and product recommendations
-              
-    #         • billing_info_agent: Billing inquiries, invoice requests, payment history, 
-    #           account balance, and financial record access
-              
-    #         • payment_order_agent: Payment processing issues, order tracking, transaction 
-    #           status, and order management support
-              
-    #         • feedback_agent: User feedback collection, reviews, suggestions, complaints, 
-    #           and improvement recommendations
-              
-    #         • analytics_agent: Data analysis requests, statistics, metrics, reporting, 
-    #           and business intelligence queries
-    #         """,
-    #         default="content_generation_agent"
-    #     )
-    # ]
-    category: Annotated[
-        Literal[
-            "search_tool_agent", 
-            "rag_agent",
-            "sales_agent",
-        ],
-        Field(
-            description="""
-            Categorizes the user query into one of the following specialized agent domains:
-              
-            • search_tool_agent: Queries requiring current information, recent news, 
-              real-time data, or web search capabilities
-              
-            • rag_agent: Document retrieval, knowledge base queries, company-specific 
-              information lookup from internal sources
-              
-            • sales_agent: Product inquiries, purchase assistance, pricing questions, 
-              sales support, and product recommendations
-            """,
-            default="sales_agent"
-        )
-    ]
+    subtasks : Annotated[List[AgentInputFormat] , "A List of necessary subtask which can improve the reponse based on user context"]
+    understading : Annotated[List[UnderstandingContext], "A List which includes what are the criterion to accept the answer and keypoint of understanding of user query"]
     
 
 

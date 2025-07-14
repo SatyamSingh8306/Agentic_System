@@ -1,0 +1,46 @@
+# category: Annotated[
+    #     Literal[
+    #         "content_generation_agent",
+    #         "search_tool_agent", 
+    #         "event_tool_agent",
+    #         "rag_agent",
+    #         "sales_agent",
+    #         "billing_info_agent", 
+    #         "payment_order_agent",
+    #         "feedback_agent",
+    #         "analytics_agent"
+    #     ],
+    #     Field(
+    #         description="""
+    #         Categorizes the user query into one of the following specialized agent domains:
+            
+    #         • content_generation_agent: General conversations, creative writing, explanations, 
+    #           educational content that don't require real-time data or specialized tools
+              
+    #         • search_tool_agent: Queries requiring current information, recent news, 
+    #           real-time data, or web search capabilities
+              
+    #         • event_tool_agent: Event-related queries including concerts, shows, activities 
+    #           with specific location, time, or date constraints
+              
+    #         • rag_agent: Document retrieval, knowledge base queries, company-specific 
+    #           information lookup from internal sources
+              
+    #         • sales_agent: Product inquiries, purchase assistance, pricing questions, 
+    #           sales support, and product recommendations
+              
+    #         • billing_info_agent: Billing inquiries, invoice requests, payment history, 
+    #           account balance, and financial record access
+              
+    #         • payment_order_agent: Payment processing issues, order tracking, transaction 
+    #           status, and order management support
+              
+    #         • feedback_agent: User feedback collection, reviews, suggestions, complaints, 
+    #           and improvement recommendations
+              
+    #         • analytics_agent: Data analysis requests, statistics, metrics, reporting, 
+    #           and business intelligence queries
+    #         """,
+    #         default="content_generation_agent"
+    #     )
+    # ]

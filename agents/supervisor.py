@@ -5,7 +5,7 @@ from langchain.schema.runnable import RunnableConfig
 from langgraph.prebuilt import ToolNode
 from langgraph.checkpoint.memory import MemorySaver
 from pydantic import BaseModel, Field
-from typing import TypedDict, List, Annotated, Literal,Optional
+from typing import TypedDict, List, Annotated, Literal,Optional, Any
 import logging
 
 
