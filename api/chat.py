@@ -46,6 +46,6 @@ async def chat_agentic_system(user_query: UserQuery = Body(...)):
 
     # If response is a dict and you want to extract last message content
     # Adjust based on actual agent response structure
-    last_message = response["message"][-2].content
+    last_message =  response.get("boss_state", {"approved" : True})[-1].get("ans")
     print(last_message)
     return JSONResponse(content={"content": last_message}, status_code=200)

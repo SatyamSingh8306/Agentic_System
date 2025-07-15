@@ -5,13 +5,24 @@ from typing import List , Optional, Literal, Annotated
 from agents.llm import __llm
 import agents.system_prompts as sp
 
-class  BossOutputFormat(BaseModel):
-    approved : Annotated[bool, "Weather all the data required in criterion is collected or not."]
-    required : Annotated[Optional[List[str]], "Why is not approved"]
+class BossOutputFormat(BaseModel):
+    approved: Annotated[
+        bool,
+        "Weather all the data required in criterion is collected or not.."
+    ]
+    required: Annotated[
+        Optional[List[str]],
+        "If 'approved' is False, this field lists the missing or incomplete requirements that need to be addressed."
+    ]
+    ans: Annotated[
+        str,
+        "The final, clear, and user-friendly response that should be presented directly to the end user."
+    ]
+
 
 boss_template = ChatPromptTemplate(
     [
-        ("system", f"{sp.supervisor_prompt}"),
+        ("system", f"{sp.boss_system_prompt}"),
         ("human", """
                     Context: {context} 
                     D/f Agent Responses : {agent_response}
