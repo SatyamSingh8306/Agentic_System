@@ -32,7 +32,9 @@ async def current_prompt():
             "supervisor": system_prompt.supervisor_prompt,
             "sales": system_prompt.sale_system_prompt,
             "rag": system_prompt.rag_system_prompt,
-            "web" : system_prompt.web_system_prompt
+            "web" : system_prompt.web_system_prompt,
+            "boss" : system_prompt.boss_system_prompt,
+            "customer_care" : system_prompt.customer_care_prompt
         }
         return JSONResponse(content=current_prompts, status_code=200)
     except Exception as e:

@@ -118,7 +118,7 @@ def search_tool_agent(state : BaseState):
     ans = []
     
     for query in queries:
-        result = web_agent({"query": query})
+        result = web_agent({"input": query})
         logging.info(f"Search result: {ans}")
         ans.append(result)
 
@@ -158,9 +158,9 @@ def rag_agent_(state : BaseState):
     }
 
 def sale_agent_(state : BaseState):
-    queries = state.get("agent_queries", {}).get("sales_agent", [])
+    queries = state.get("agent_queries", {}).get("sale_agent", [])
     logging.info(f"<{"="*40} Sales Agent {"="*40}>")
-    logging.info(f"Search tool queries: {queries}")
+    logging.info(f"Sale Agent queries: {queries}")
     ans = []
     
     for query in queries:
@@ -227,13 +227,13 @@ def boss_supervisor(state : BaseState):
     # You can aggregate or review as needed
     summary = "Result By Different Agents\n"
     if sales_result:
-        summary += f"- Sales: {sales_result}\n"
+        summary += f"- Sales Agent: {sales_result}\n"
     if rag_result:
-        summary += f"- RAG: {rag_result}\n"
+        summary += f"- RAG Agent: {rag_result}\n"
     if search_result:
-        summary += f"- Search: {search_result}\n"
+        summary += f"- Search tool Agent: {search_result}\n"
     if customer_result:
-        summary += f"- Customer Care: {customer_result}\n"
+        summary += f"- Customer Care Agent: {customer_result}\n"
 
     logging.info(f"Boss final review summary: {summary}")
 

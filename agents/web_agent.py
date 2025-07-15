@@ -29,7 +29,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 tool = TavilySearchResults(tavily_api_key = getenv("TAVILY_API_KEY"), max_results=2)
 
-agent = initialize_agent(
+web_agent = initialize_agent(
     llm = __llm,
     tools=[tool],
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
@@ -70,7 +70,6 @@ def process_search(query):
         logger.error(f"Error in search agent: {e}")
         return {"output": f"Error occurred: {str(e)}"}
 
-web_agent = process_search
 
 if __name__ == "__main__":
     ans = agent.invoke({"input": "who is current pm of usa 2025 do web search?"})

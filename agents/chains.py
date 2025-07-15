@@ -10,11 +10,11 @@ import agents.system_prompts as sp
 load_dotenv()
 
 class AgentInputFormat(BaseModel):
-    agent_name : Annotated[str, Literal[
+    agent_name : Literal[
             "search_tool_agent", 
             "rag_agent",
             "sales_agent",
-            "customer_care_agent"]]
+            "customer_care_agent"]
     query : Annotated[List[str], "Queries to asked by corresponding selected Agent"]
 
 class UnderstandingContext(BaseModel):
@@ -143,5 +143,5 @@ query_chain = search_prompt | __llm
 
 
 if __name__ == "__main__":
-    response = conversation_chain.invoke({"query" :"what hapened in lucknow on date 3 july 2025"})
+    response = classification_chain.invoke("what hapened in lucknow on date 3 july 2025")
     print(response)

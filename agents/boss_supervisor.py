@@ -8,7 +8,7 @@ import agents.system_prompts as sp
 class BossOutputFormat(BaseModel):
     approved: Annotated[
         bool,
-        "Weather all the data required in criterion is collected or not.."
+        "Weather all the data required in criterion is collected or not.if most of them is satisfied then approve."
     ]
     required: Annotated[
         Optional[List[str]],
@@ -16,7 +16,7 @@ class BossOutputFormat(BaseModel):
     ]
     ans: Annotated[
         str,
-        "The final, clear, and user-friendly response that should be presented directly to the end user."
+        "Merge the responses of d/f agents"
     ]
 
 

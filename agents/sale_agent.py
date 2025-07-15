@@ -33,9 +33,9 @@ redis_client = Redis(
     password=getenv('REDIS_PASSWORD'),
 )
 
-# embedding_model = HuggingFaceEmbeddings(model="BAAI/bge-m3")
-embedding_model = None
-similarity_threshold = 0.75
+embedding_model = HuggingFaceEmbeddings(model="BAAI/bge-m3")
+# embedding_model = None
+similarity_threshold = 0
 
 client = MongoClient(getenv('DB'))
 db = client['event_db']
@@ -103,7 +103,7 @@ def search_event(query: Optional[str] = None, date: Optional[str] = None, price:
                 "path": "embedding",
                 "queryVector": query_embedding,
                 "numCandidates": 100,
-                "limit": 20
+                "limit": 50
             }
         })
 
@@ -214,7 +214,7 @@ def search_event(query: Optional[str] = None, date: Optional[str] = None, price:
     results = new_event_collection.aggregate(pipeline).to_list(length=None)
     full_res = []
     res = []
-
+    
     for result in results:
         event_id = result['event_id']
         score = result.get('score', 0)
@@ -227,17 +227,18 @@ def search_event(query: Optional[str] = None, date: Optional[str] = None, price:
 
 @tool
 def search_tool(
-    query: Annotated[Optional[str], 'The query of the user if no query then return " " '],
-    city: Annotated[Optional[str], 'City of the user (has to be an actual city) if no city then return " " '],
-    price: Annotated[Optional[str], "It can be 'under max price', 'above min price', 'min price - max price' if no price then return ' ' "],
-    date: Annotated[Optional[str], "date (string, optional) – Event date (YYYY-MM-DD) or (YYYY-MM-DD to YYYY-MM-DD) if no date then return ' ' "],
+    query: Annotated[Optional[str], 'The query of the user if no query then return " " '] = "",
+    city: Annotated[Optional[str], 'City of the user (has to be an actual city) if no city then return " " '] ="",
+    price: Annotated[Optional[str], "It can be 'under max price', 'above min price', 'min price - max price' if no price then return ' ' "] = "",
+    date: Annotated[Optional[str], "date (string, optional) – Event date (YYYY-MM-DD) or (YYYY-MM-DD to YYYY-MM-DD) if no date then return ' ' "]= "",
     top_rated: Annotated[Optional[bool], "Whether we want top rated events or not, if no top_rated then return boolean False"] = False
 ):
     """
     Search for events based on user parameters and return compact Markdown-formatted output.
     """
 
-    logging.info(f"Searched with query: {query}, date: {date}, price: {price}, city: {city}, top_rated: {top_rated}")
+    # logging.info(f"Searched with query: {query}, date: {date}, price: {price}, city: {city}, top_rated: {top_rated}")
+    
 
     # Normalize inputs
     query = query.strip() if query else ""
@@ -261,10 +262,11 @@ def search_tool(
         date = f"{current_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
 
     full_res = search_event(query=query, date=date, price=price, top_rated=top_rated)
-    logging.info(f"Search results: {len(full_res)}")
+    
 
     # Sort and filter
     full_res.sort(key=lambda x: x.get('tickets_sold', 0), reverse=True)
+    
     if city:
         full_res = [event for event in full_res if city in event.get('theater_address', '')]
 
@@ -333,7 +335,7 @@ sale_agent = agent = initialize_agent(
     agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     handle_parsing_errors=True,
-    max_iterations=1,  # optional, default fine
+    max_iterations=2,  # optional, default fine
     agent_kwargs={
         "prefix": sp.sale_system_prompt
     },
@@ -351,21 +353,23 @@ def get_answer(query):
 
 if __name__ == "__main__":
     def main():
-        agent = sale_agent
+        # agent = sale_agent
         
-        # Test queries
-        test_queries = [
-            "Suggest me Some events in Lucknow about music?",
-            "what is your name?"
-        ]
+        # # Test queries
+        # test_queries = [
+        #     "Events in delhi"
+        # ]
         
-        for query in test_queries:
-            print(f"\n🔍 Query: {query}")
-            response = agent.invoke(query)
-            # agent.invoke(query)
-            print(f"🤖 Response: {response}")
-            # ans = search_tool.invoke({"query" : "", "city" : "lucknow", "date" : " ", "price" : "", "top_rated" : False})
-            # print(ans)
+        # for query in test_queries:
+        #     print(f"\n🔍 Query: {query}")
+        #     response = agent.invoke(query)
+        #     # agent.invoke(query)
+            # print(f"🤖 Response: {response}")
+            ans = search_tool.invoke({
+                "query": "fun",
+                "city": "Delhi"
+            }, verbose=True)
+            print(ans)
             
     main()
 
