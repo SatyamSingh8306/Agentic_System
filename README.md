@@ -21,7 +21,7 @@ This agentic system provides a robust architecture for creating AI agents that c
 - **Extensible Architecture**: Easy to add new capabilities and integrations
 
 ## 🏗️ Architecture
-![Architecture Diagram](/assets/output.png)
+![Architecture Diagram](/assets/architecture.svg)
 
 ## 🛠️ Installation
 
