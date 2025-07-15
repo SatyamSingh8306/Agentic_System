@@ -8,16 +8,17 @@ import agents.system_prompts as sp
 class BossOutputFormat(BaseModel):
     approved: Annotated[
         bool,
-        "Weather all the data required in criterion is collected or not.if most of them is satisfied then approve."
+        "Whether all required data and criteria are sufficiently met. If most key points are satisfied, set to True."
     ]
     required: Annotated[
         Optional[List[str]],
-        "If 'approved' is False, this field lists the missing or incomplete requirements that need to be addressed."
+        "If 'approved' is False, list the missing or incomplete points that need to be addressed."
     ]
     ans: Annotated[
         str,
-        "Merge the responses of d/f agents"
+        "A clear, friendly, and polished final message to be sent to the user. This should be based on the user's original query and the draft reply from other agents."
     ]
+
 
 
 boss_template = ChatPromptTemplate(
