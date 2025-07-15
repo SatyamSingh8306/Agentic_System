@@ -5,6 +5,7 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel , Field
 from typing import Annotated, Literal, List, Optional
 from dotenv import load_dotenv
+from os import getenv
 import agents.system_prompts as sp
 load_dotenv()
 
@@ -14,7 +15,7 @@ class AgentInputFormat(BaseModel):
             "rag_agent",
             "sales_agent",
             "customer_care_agent"]]
-    query : Annotated[List[str], "Queries to ask to a paricular Agent"]
+    query : Annotated[List[str], "Queries to asked by corresponding selected Agent"]
 
 class UnderstandingContext(BaseModel):
     criteria : Annotated[List[str],"A detailed List of criterion required based on user query to pass the user query"]
@@ -111,14 +112,14 @@ template = ChatPromptTemplate(
 )
 
 
-__llm = ChatGroq(
-    model = "deepseek-r1-distill-llama-70b"
-)
-
-# __llm = ChatOllama(
-#     model = "gemma2:9b",
-#     base_url = "https://a59ulrlntmv161-11434.proxy.runpod.net/"
+# __llm = ChatGroq(
+#     model = "deepseek-r1-distill-llama-70b"
 # )
+
+__llm = ChatOllama(
+    model = getenv("OLLAMA_MODEL"),
+    base_url = getenv("OLLAMA_BASE_URL")
+)
 
 llm = __llm.with_structured_output(SupervisorResponse)
 classification_chain = template | llm

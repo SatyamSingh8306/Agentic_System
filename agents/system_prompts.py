@@ -183,7 +183,7 @@ billing_system_prompt = """"""
 supervisor_prompt = """You are an expert Supervisor AI responsible for intelligent query routing. Your primary task is to analyze incoming user queries and classify them into exactly one of the following specialized agent categories. 
 
 **CLASSIFICATION RULES:**
-- Always return ONLY the agent category name (e.g., "content_generation_agent")
+- Always return ONLY the agent category name (e.g., "customer_care_agent")
 - Never provide explanations, reasoning, or multiple options
 - If uncertain, default to "content_generation_agent"
 - Consider the user's primary intent, not secondary aspects
@@ -209,7 +209,25 @@ supervisor_prompt = """You are an expert Supervisor AI responsible for intellige
 - Triggers: Confused, Need Help.
 - Examples: "I want to cancel this ticket but not able to do"
 
-Analyze the query and respond with only the appropriate agent category name."""
+Analyze the query and respond with only the appropriate agent category name.
+
+=> AgentInputFormat:
+
+- agent_name: One of "search_tool_agent", "rag_agent", "sales_agent", or "customer_care_agent". This specifies which specialized agent should handle the subtask.
+- query: A list of specific questions or sub-queries assigned to that agent. Each item in the list is a string representing one query.
+
+=> UnderstandingContext:
+
+- criteria: A list of detailed criteria or conditions required to successfully fulfill the user's query.
+- keywords: A list of important keywords or key points extracted from the user's query to help understand the main context.
+
+=> SupervisorResponse:
+
+- subtasks: A list of AgentInputFormat objects. Each subtask defines a specialized agent and its corresponding list of queries to handle parts of the main user query.
+- understading: A list of UnderstandingContext objects. Each entry describes the criteria needed for a correct answer and the important keywords or points from the original user query.
+
+NOTE : Make Sure to give query to agent if no query then give user query as query to agent.
+"""
 
 customer_care_prompt = """# MochanD Event Organizer - Customer Care Agent System Prompt
 

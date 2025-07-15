@@ -14,9 +14,9 @@ template = ChatPromptTemplate([
     ("human", "{query}")
 ])
 
-rag_agent = template | __llm
+customer_care_chain = template | __llm
 
 if __name__ == "__main__":
-    ans = rag_agent.invoke({"query" :"Check the events you have about music events?"})
+    ans = customer_care_chain.invoke({"query" :"Check the events you have about music events?"})
     print(ans.content)
 

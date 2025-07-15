@@ -12,7 +12,11 @@ class  BossOutputFormat(BaseModel):
 boss_template = ChatPromptTemplate(
     [
         ("system", f"{sp.supervisor_prompt}"),
-        ("human", "{query}")
+        ("human", """
+                    Context: {context} 
+                    D/f Agent Responses : {agent_response}
+                    User_Query : {query}
+         """)
     ]
 )
 

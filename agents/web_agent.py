@@ -29,31 +29,31 @@ prompt = ChatPromptTemplate.from_messages([
 
 tool = TavilySearchResults(tavily_api_key = getenv("TAVILY_API_KEY"), max_results=2)
 
-# agent = initialize_agent(
-#     llm = __llm,
-#     tools=[tool],
-#     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-#     verbose = True,
-#     handle_parsing_errors = True,
-#     max_iteration = 1,
-#     agent_kwargs={
-#             "system_message": sp.web_system_prompt
-#     },
-#     early_stopping_method = "force"
+agent = initialize_agent(
+    llm = __llm,
+    tools=[tool],
+    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+    verbose = True,
+    handle_parsing_errors = True,
+    max_iteration = 1,
+    agent_kwargs={
+            "system_message": sp.web_system_prompt
+    },
+    early_stopping_method = "force"
+ )
+# model = ChatOllama(
+#     model = "qwen3:30b",
+#     base_url='https://r5c7ifq4m0tjvf-11434.proxy.runpod.net/'
 # )
-model = ChatOllama(
-    model = "qwen3:30b",
-    base_url='https://r5c7ifq4m0tjvf-11434.proxy.runpod.net/'
-)
 
-_agent = create_react_agent(
-    model = model,
-    tools=[tool]
-)
+# _agent = create_react_agent(
+#     model = model,
+#     tools=[tool]
+# )
 
-agent = AgentExecutor(agent=_agent, 
-                      tools = [tool], 
-                      verbose=True)
+# agent = AgentExecutor(agent=_agent, 
+#                       tools = [tool], 
+#                       verbose=True)
 
 def process_search(query):
     if isinstance(query, dict):
@@ -62,7 +62,10 @@ def process_search(query):
     try:
         response = agent.invoke({"query": query})
         logger.info(f"Search agent response: {response}")
-        return {"output": response["output"]}
+        return {
+            "query": query,
+            "output": response["output"]
+        }
     except Exception as e:
         logger.error(f"Error in search agent: {e}")
         return {"output": f"Error occurred: {str(e)}"}
