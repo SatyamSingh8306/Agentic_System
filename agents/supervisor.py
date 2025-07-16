@@ -251,13 +251,15 @@ def boss_supervisor(state : BaseState):
     categories = state.get("categories", [])
     message = state.get("message", "")
 
+    current = message[-1]
     force_approve = "False" if counter < 2 else "True"
 
     invoke_payload = {
         "force_approve": force_approve,
         "context": categories,
         "agent_response": summary,
-        "query": message
+        "query": current,
+        "prev" : message[:-1]
     }
     ans = boss.invoke(invoke_payload).model_dump()
     logging.info(f"Answer by Boss Supervisor : {ans}")
