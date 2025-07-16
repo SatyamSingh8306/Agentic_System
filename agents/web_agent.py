@@ -39,7 +39,7 @@ web_agent = initialize_agent(
     agent_kwargs={
             "system_message": sp.web_system_prompt
     },
-    early_stopping_method = "force"
+    early_stopping_method = "generate"
  )
 # model = ChatOllama(
 #     model = "qwen3:30b",

@@ -31,10 +31,10 @@ agent = initialize_agent(
     verbose = True,
     handle_parsing_errors = True,
     max_iteration = 1,
-    early_stopping_method = "force",
+    early_stopping_method = "generate",
     agent_kwargs={
         "system_message" : sp.rag_system_prompt
-    }
+    },
 )
 
 rag_agent = agent

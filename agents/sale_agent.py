@@ -339,7 +339,7 @@ sale_agent = agent = initialize_agent(
     agent_kwargs={
         "prefix": sp.sale_system_prompt
     },
-    early_stopping_method="force"
+    early_stopping_method="generate"
 )
 
 
