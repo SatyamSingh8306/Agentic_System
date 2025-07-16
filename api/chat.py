@@ -8,8 +8,6 @@ from typing import Dict,Any
 from langchain_core.messages import HumanMessage, AIMessage
 
 router = APIRouter()
-memory = MemorySaver()
-agent = graph.compile(checkpointer=memory)
 
 from pydantic import BaseModel
 from typing import List, Dict, Any
@@ -48,6 +46,8 @@ async def chat_agentic_system(request: ChatMessage = Body(...)):
         "category" : []
     }
 
+    memory = MemorySaver()
+    agent = graph.compile(checkpointer=memory)
     # Call agent.ainvoke with converted messages
     response = await agent.ainvoke(formatted_query, config=config)
 
