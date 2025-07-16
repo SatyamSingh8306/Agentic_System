@@ -46,10 +46,13 @@ def categories(state : BaseState):
     logging.info(f"<{"="*40} Supervisor Agent {"="*40}>")
     logging.info(f"State in supervisor node --> {state}")
     message_content = state.get("message", "")
+    current = message_content[-1]
+    logging.info(f"Current Query : {current}")
+    logging.info(f"PlaceHolder variable content : {message_content[:-1]}")
     print(message_content)
     logging.info(f"Supervisor Content {message_content}")
     ans = {"category" : "sales_agent"}
-    ans = chain.invoke({"query": message_content}).model_dump()
+    ans = chain.invoke({"query": current, "prev":message_content[:-1]}).model_dump()
     logging.info(f"Supervisor : {ans}")
     return {
         "categories": [ans]

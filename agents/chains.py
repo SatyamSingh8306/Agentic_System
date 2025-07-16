@@ -108,6 +108,7 @@ class SupervisorResponse(BaseModel):
 template = ChatPromptTemplate(
     [
         ("system", f"{sp.supervisor_prompt}"),
+        MessagesPlaceholder(variable_name="prev"),
         ("human", "{query}")
     ]
 )

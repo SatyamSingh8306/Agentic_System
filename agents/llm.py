@@ -15,7 +15,7 @@ _llm = ChatGroq(
 # )
 
 __llm = ChatOllama(
-    model = getenv("OLLAMA_MODEL", "qwen3:30b"),
+    model = getenv("OLLAMA_MODEL"),
     base_url= getenv("OLLAMA_BASE_URL"),
     temperature=0.2
 )
