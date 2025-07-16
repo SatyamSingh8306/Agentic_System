@@ -16,6 +16,7 @@ from agents.boss_supervisor import BossOutputFormat
 from agents.chains import SupervisorResponse
 from agents.boss_supervisor import boss
 from agents.customer_care_agent import customer_care_chain
+from agents.search_agent import run_web_agent
 
 logging.basicConfig(level = logging.INFO)
 
@@ -125,7 +126,7 @@ def search_tool_agent(state : BaseState):
     ans = []
     
     for query in queries:
-        result = web_agent({"input": query})
+        result = run_web_agent(query=query)
         logging.info(f"Search result: {ans}")
         ans.append(result)
 
