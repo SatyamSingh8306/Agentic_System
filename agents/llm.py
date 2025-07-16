@@ -14,12 +14,12 @@ _llm = ChatGroq(
 #     temperature=0.2
 # )
 
-# __llm = ChatOllama(
-#     model = getenv("OLLAMA_MODEL", "qwen3:30b"),
-#     base_url= getenv("OLLAMA_BASE_URL"),
-#     temperature=0.2
-# )
-__llm = ChatGoogleGenerativeAI(
+__llm = ChatOllama(
+    model = getenv("OLLAMA_MODEL", "qwen3:30b"),
+    base_url= getenv("OLLAMA_BASE_URL"),
+    temperature=0.2
+)
+___llm = ChatGoogleGenerativeAI(
     model = "gemini-2.0-flash-lite",
     api_key = getenv("GOOGLE_API_KEY"),
     temperature=0.2
