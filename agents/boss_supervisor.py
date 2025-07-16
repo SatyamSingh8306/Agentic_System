@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel
 from typing import List , Optional, Literal, Annotated
-from agents.llm import __llm
+from agents.llm import _llm
 import agents.system_prompts as sp
 
 class BossOutputFormat(BaseModel):
@@ -33,7 +33,7 @@ boss_template = ChatPromptTemplate(
     ]
 )
 
-boss = boss_template | __llm.with_structured_output(BossOutputFormat)
+boss = boss_template | _llm.with_structured_output(BossOutputFormat)
 
 if __name__ == "__main__":
     response = boss.invoke({"query": "nothing"})

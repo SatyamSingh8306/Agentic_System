@@ -22,13 +22,13 @@ class UserQuery(BaseModel):
     messages: List[QueryMessage]
 
 class ChatMessage(BaseModel):
-    user_id : str
+    userid : str
     user_query : UserQuery
 
 @router.post("/chat")
 async def chat_agentic_system(request: ChatMessage = Body(...)):
     lc_messages = []
-    user_id = request.user_id
+    user_id = request.userid
     user_query = request.user_query
     
     for msg in user_query.messages:
@@ -36,7 +36,7 @@ async def chat_agentic_system(request: ChatMessage = Body(...)):
             lc_messages.append(HumanMessage(content=msg.content))
         elif msg.role == "assistant":
             lc_messages.append(AIMessage(content=msg.content))
-    
+    print(f"<{"="*50}List of messages are : {lc_messages} {"="}>")
     config = RunnableConfig(
         configurable={
             "thread_id": f"{user_id}"
