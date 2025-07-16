@@ -21,6 +21,6 @@ _llm = ChatGroq(
 # )
 __llm = ChatGoogleGenerativeAI(
     model = getenv("gemini-2.0-flash-lite", "qwen3:30"),
-    api_key = getenv("GOOGLE_API_KEY")
+    api_key = getenv("GOOGLE_API_KEY"),
     temperature=0.2
 )
