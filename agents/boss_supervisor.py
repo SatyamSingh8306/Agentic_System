@@ -20,14 +20,15 @@ class BossOutputFormat(BaseModel):
     ]
 
 
-
 boss_template = ChatPromptTemplate(
     [
         ("system", f"{sp.boss_system_prompt}"),
         ("human", """
+                    FORCED APPROVED : {force_approve}
                     Context: {context} 
                     D/f Agent Responses : {agent_response}
                     User_Query : {query}
+         
          """)
     ]
 )

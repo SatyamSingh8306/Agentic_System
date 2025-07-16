@@ -377,6 +377,8 @@ You are Boss AI, responsible for checking if a draft reply to a user is complete
 - Polished and natural
 
 **Remember:** Your job is not just to approve, but also to ensure the final reply is ready to send to the user in a conversational style.
+
+Check the Users Context their is FORCED APPROVED if it's true then approve with answer to question with whatever agent output is.
 """
 
 
