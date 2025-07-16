@@ -7,6 +7,7 @@ from typing import Annotated, Literal, List, Optional
 from dotenv import load_dotenv
 from os import getenv
 import agents.system_prompts as sp
+from agents.llm import __llm
 load_dotenv()
 
 class AgentInputFormat(BaseModel):
@@ -116,10 +117,10 @@ template = ChatPromptTemplate(
 #     model = "deepseek-r1-distill-llama-70b"
 # )
 
-__llm = ChatOllama(
-    model = getenv("OLLAMA_MODEL"),
-    base_url = getenv("OLLAMA_BASE_URL")
-)
+# __llm = ChatOllama(
+#     model = getenv("OLLAMA_MODEL"),
+#     base_url = getenv("OLLAMA_BASE_URL")
+# )
 
 llm = __llm.with_structured_output(SupervisorResponse)
 classification_chain = template | llm
