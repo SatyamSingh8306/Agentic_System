@@ -1,4 +1,4 @@
-from agents.chains import classification_chain, conversation_chain
+from chains import classification_chain, conversation_chain
 from langgraph.graph import StateGraph, END, add_messages
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.prebuilt import ToolNode
@@ -12,6 +12,7 @@ memory = MemorySaver()
 class BaseState(TypedDict):
     message: Annotated[List[str], add_messages]
     categories: Annotated[List[str], add_messages]
+    query : Annotated[List[str], add_messages]
 
 def categories(state):
     # Extract the actual message content for the chain
@@ -44,6 +45,9 @@ def next_node_selector(state):
     else:
         print(f"executing end  {cat}\n")
         return END
+
+def generate_query(state):
+     
 
 @tool
 def search_tool_agent(query : Annotated[str, "User Query to search online"]):

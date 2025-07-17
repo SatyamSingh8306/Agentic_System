@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional, Annotated
 from datetime import datetime, timedelta,timezone
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import OllamaEmbeddings
 import re
 from dateutil.relativedelta import relativedelta
 from redis import Redis
@@ -33,7 +34,7 @@ redis_client = Redis(
     password=getenv('REDIS_PASSWORD'),
 )
 
-embedding_model = HuggingFaceEmbeddings(model="BAAI/bge-m3")
+embedding_model = OllamaEmbeddings(model="bge-m3", base_url = getenv("OLLAMA_BASE_URL"))
 # embedding_model = None
 similarity_threshold = 0
 
