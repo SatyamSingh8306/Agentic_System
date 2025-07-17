@@ -19,8 +19,8 @@ __llm = ChatOllama(
     base_url= getenv("OLLAMA_BASE_URL"),
     temperature=0.2
 )
-___llm = ChatGoogleGenerativeAI(
-    model = "gemini-2.0-flash-lite",
-    api_key = getenv("GOOGLE_API_KEY"),
-    temperature=0.2
-)
+# ___llm = ChatGoogleGenerativeAI(
+#     model = "gemini-2.5-pro",
+#     api_key = getenv("GOOGLE_API_KEY"),
+#     temperature=0.2
+# )

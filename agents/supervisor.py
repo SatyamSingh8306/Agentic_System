@@ -274,11 +274,11 @@ def is_approved(state: BaseState):
     counter = state.get("counter", 0)
     if counter is None:
         counter = 0
-
-    if response.get("approved"):
-        return END
-    else:
-        return "supervisor"
+    return END
+    # if response.get("approved"):
+    #     return END
+    # else:
+    #     return "supervisor"
 
 # Create the graph
 graph = StateGraph(BaseState)
