@@ -1,14 +1,12 @@
-from langchain.agents import initialize_agent, AgentType
-from langchain.agents import create_react_agent, AgentExecutor
-from agents.llm import __llm
-from langchain_community.tools import DuckDuckGoSearchResults
+from langchain_community.utilities import GoogleSerperAPIWrapper
+from pydantic import BaseModel
+from langchain_core.tools import BaseTool
 import agents.system_prompts as sp
-from langchain_ollama import ChatOllama
+from typing import Type
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
 from langchain_core.prompts import SystemMessagePromptTemplate,MessagesPlaceholder
-from langchain_tavily import TavilySearch
-from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate
-from langgraph.prebuilt import create_react_agent
 import logging
 from os import getenv
 
@@ -27,50 +25,73 @@ prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ])
 
-tool = TavilySearchResults(tavily_api_key = getenv("TAVILY_API_KEY"), max_results=2)
+# tool = TavilySearchResults(tavily_api_key = getenv("TAVILY_API_KEY"), max_results=2)
 
-web_agent = initialize_agent(
-    llm = __llm,
-    tools=[tool],
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    verbose = True,
-    handle_parsing_errors = True,
-    max_iteration = 1,
-    agent_kwargs={
-            "system_message": sp.web_system_prompt
-    },
-    early_stopping_method = "generate"
- )
-# model = ChatOllama(
-#     model = "qwen3:30b",
-#     base_url='https://r5c7ifq4m0tjvf-11434.proxy.runpod.net/'
-# )
+tool = GoogleSerperAPIWrapper(
+    api_key=getenv("SERPER_API_KEY"),
+    k=30,
+    hl="en",
+    gl="in"
+)
 
-# _agent = create_react_agent(
-#     model = model,
-#     tools=[tool]
-# )
+class WebSearchInput(BaseModel):
+    query: str
 
-# agent = AgentExecutor(agent=_agent, 
-#                       tools = [tool], 
-#                       verbose=True)
+class WebSearchTool(BaseTool):
+    name: str = "web_search"
+    description: str = (
+        "Use this tool to search the web for current information, news, or general queries. "
+    )
+    args_schema: Type[BaseModel] = WebSearchInput
+    return_direct: bool = True
 
-def process_search(query):
-    if isinstance(query, dict):
-        query = query.get("query", "")
-    logger.info(f"Processing search query: {query}")
-    try:
-        response = agent.invoke({"query": query})
-        logger.info(f"Search agent response: {response}")
-        return {
-            "query": query,
-            "output": response["output"]
-        }
-    except Exception as e:
-        logger.error(f"Error in search agent: {e}")
-        return {"output": f"Error occurred: {str(e)}"}
+    def _run(self, query: str) -> str:
+        # Placeholder method — replace with actual sync call if needed.
+        return f"Searching the web for: {query} (this is a placeholder response)"
+
+
+web_tool = WebSearchTool()
+
+
+async def web_search(query) -> str:
+    """
+    Asynchronously formats search result items into Markdown.
+    
+    Args:
+        query (str): The search query to be processed.
+
+    Returns:
+        str: A markdown-formatted string of the results.
+    """
+    results = await tool.aresults(query)
+    if not results:
+        return "❌ No results found."
+
+    organic_results = results.get("organic", [])
+
+    md_lines = ["# 🔍 Web Search Results\n"]
+
+    for idx, result in enumerate(organic_results):
+        title = result.get("title", "No Title")
+        snippet = result.get("snippet", "No snippet available.")
+        link = result.get("link", "#")
+        date = result.get("date", "Unknown time")
+
+        md_lines.append(
+            f"### {idx + 1}. [{title}]({link})\n"
+            f"**🕒 {date}**\n\n"
+            f"{snippet}\n"
+        )
+
+    return { "output" : "\n".join(md_lines) }
 
 
 if __name__ == "__main__":
-    ans = agent.invoke({"input": "who is current pm of usa 2025 do web search?"})
-    print(ans)
+
+    lst = ["Most affordable hospitals in indore"]
+    async def main():
+        for l in lst:
+            ans = await web_search(l)
+            print(ans)
+    import asyncio
+    asyncio.run(main())

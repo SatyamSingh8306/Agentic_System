@@ -9,7 +9,7 @@ from datetime import datetime
 import agents.system_prompts as sp
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, AIMessage
-from .llm import __llm
+from .llm import __llm, ___llm
 from dotenv import load_dotenv
 from os import getenv
 load_dotenv()
@@ -20,14 +20,14 @@ logging.basicConfig(level=logging.INFO)
 
 def get_mochand_prompt():
     return ChatPromptTemplate.from_messages([
-        ("system", f"{sp.sale_system_prompt} Today's date is {datetime.now().strftime("%Y-%m-%d")}"),
+        ("system", f"{sp.modified_sale_system_prompt} Today's date is {datetime.now().strftime("%Y-%m-%d")}"),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}")
     ])
 
 def get_boss_prompt():
     return ChatPromptTemplate.from_messages([
-        ("system", f"{sp.boss_system_prompt} Today's date is {datetime.now().strftime('%Y-%m-%d')}"),
+        ("system", f"{sp.modified_boss_system_prompt} Today's date is {datetime.now().strftime('%Y-%m-%d')}"),
         # MessagesPlaceholder(variable_name="chat_history"),
         ("human", "Human Query : {input} \n Tool Results : {tool_result}")
     ])
@@ -42,19 +42,22 @@ class BaseState(TypedDict):
     tool_result : Annotated[List[Any], "List of tool results"]
 
 
-
+# Added tools
 model_with_tools = __llm.bind_tools([web_tool, sales_tool, rag_tool])
+# Added tools
+
+# model_with_tools = ___llm
 # model = mohanD_prompt | model_with_tools
 
 # boss_chain = boss_prompt | __llm
 
-async def mohanD(state : BaseState) -> BaseState:
+async def mochanD(state : BaseState) -> BaseState:
     mochand_prompt = get_mochand_prompt()
     model = mochand_prompt | model_with_tools
     messages = state["messages"]
     message = state["messages"][-1]
     response = await model.ainvoke({"chat_history": messages[:-1], "input": message})
-    logging.info(f"Response from MohanD: {response}")
+    logging.info(f"Response from MochanD: {response}")
     return {
         "messages": response
     }
@@ -66,6 +69,8 @@ async def splitter(state: BaseState):
 
     if messages.tool_calls:
         tasks = []
+
+        logging.info(f"Processing tool calls: {messages.tool_calls}")
 
         for tool_call in messages.tool_calls:
             tool_name = tool_call.get("name")
@@ -125,6 +130,7 @@ async def sales_agent(state: BaseState) -> BaseState:
     logging.info(f"Message to boss Agent: {message}")
     tool_results = "\n".join(tool["output"] for tool in tools_result)
     response = await boss_chain.ainvoke({"input": message, "tool_result": tool_results})
+    logging.info(f"Response from Sales Agent: {response}")
     return {
         "messages": response,
         "__next__": END
@@ -132,22 +138,26 @@ async def sales_agent(state: BaseState) -> BaseState:
 
 graph = StateGraph(BaseState)
 
-graph.add_node("mohanD", mohanD)
+graph.add_node("mochanD", mochanD)
 graph.add_node("splitter", splitter)
 graph.add_node("sales_agent", sales_agent)  
 
-graph.set_entry_point("mohanD")
-graph.add_edge("mohanD", "splitter")
+graph.set_entry_point("mochanD")
+graph.add_edge("mochanD", "splitter")
 graph.add_edge("splitter", "sales_agent")   
 graph.add_edge("sales_agent", END)
 
 app = graph.compile()
 
 if __name__ == "__main__":
-    ans = app.ainvoke({"messages": [HumanMessage(content="Hii bhai kya haal hai?"), AIMessage(content="Sab badhiya hai, aap kaise hain?"), HumanMessage("Mera bhi sahi hai lucknow me events dikhao"), AIMessage(content="""Lucknow ke events dekho bhai! 🎉
-- **Zakir Khan ka "Papa Yaar"** 30 July ko Indira Gandhi Pratishthan me, ticket ₹1299
-- **Anuv Jain & Zaeden** 29 July ko Phoenix Palassio me, ₹999 me enjoy karo
-- **Twilight Carnival 2025** (New Year ke liye!) 31 December ko Dayal Gateway me, ₹699
-
-Kya kuch specific event ya genre pasand hai? Mera pass lock karo ya details chahiye? 😎"""), HumanMessage("Chalo ab delhi me events batao weekend ke")], "tool_result": []})
-    print(ans["messages"][-1].content)
+    async def main():
+        print("Starting the agent...")
+        ans = await app.ainvoke({
+            "messages": [
+                HumanMessage(content="""Managing events in Thar Desert but need comprehensive safety planning. Research on desert survival protocols for large groups, contact info for specialized rescue services, information about communication systems that work in remote areas, and backup plans for extreme weather conditions"""),
+            ]})
+        print(ans["messages"][-1].content)
+        # print(ans)
+    
+    import asyncio
+    asyncio.run(main())

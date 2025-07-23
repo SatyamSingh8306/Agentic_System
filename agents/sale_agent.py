@@ -1,20 +1,19 @@
-#from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
+# from pymongo import MongoClient
 import logging
 import asyncio
 import json
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional, Annotated
+from typing import List, Dict, Any, Optional, Annotated, Type
 from datetime import datetime, timedelta,timezone
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_ollama import OllamaEmbeddings
 import re
 from dateutil.relativedelta import relativedelta
 from redis import Redis
 from langchain.agents import initialize_agent, AgentType
-from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel
+from langchain_core.tools import BaseTool
 from langchain.tools import tool
-from langchain_core.tools import StructuredTool
+from langchain_openai.embeddings import OpenAIEmbeddings
 from datetime import datetime, timedelta
 import re
 from pymongo import ASCENDING
@@ -34,11 +33,12 @@ redis_client = Redis(
     password=getenv('REDIS_PASSWORD'),
 )
 
-embedding_model = OllamaEmbeddings(model="bge-m3", base_url = getenv("OLLAMA_BASE_URL"))
+# embedding_model = OllamaEmbeddings(model="bge-m3", base_url = getenv("OLLAMA_BASE_URL"))
+embedding_model = OpenAIEmbeddings()
 # embedding_model = None
-similarity_threshold = 0
+similarity_threshold = 0.5
 
-client = MongoClient(getenv('DB'))
+client = AsyncIOMotorClient(getenv('DB'))
 db = client['event_db']
 event_collection = db['events']
 order_collection = db['orders']
@@ -54,31 +54,31 @@ async def get_events(
 )->List:
     """To get all the list of events"""
     res = []
-    cursor = new_event_collection.find({},{"embedding":0})
+    cursor = await new_event_collection.find({},{"embedding":0})
     async for data in cursor:
         res.append(data)
     return res
 
 
-def get_event(event_id:Annotated[str, "A unique Identifier to a paricular event."]):
+async def get_event(event_id:Annotated[str, "A unique Identifier to a paricular event."]):
     """To get a paricular event pased on id"""
     try:
-        return event_collection.find_one({"event_id":event_id})
+        return await event_collection.find_one({"event_id":event_id})
     except Exception as e:
         logging.error(f"Error fetching event: {e}")
         return None
    
-def update_booking_success(order_id:Annotated[str, "A unique id for user who have placed his order"]) -> dict:
+async def update_booking_success(order_id:Annotated[str, "A unique id for user who have placed his order"]) -> dict:
     """To check the booking status of a person based on order id"""
     try:
-        order_collection.update_one({"transaction_id":order_id},{"$set":{"payment_status":"completed"}})
+        await order_collection.update_one({"transaction_id":order_id},{"$set":{"payment_status":"completed"}})
         return {'status':'success'}
     except Exception as e:
         logging.error(f"Error updating booking success: {e}")
         return {'status':'failed'}
 
 
-def search_event(query: Optional[str] = None, date: Optional[str] = None, price: Optional[str] = None, top_rated:bool = False,k: int = 3):
+async def search_event(query: Optional[str] = None, date: Optional[str] = None, price: Optional[str] = None, top_rated:bool = False,k: int = 3):
     """
     Search for events based on query, month, and price, sorted by upcoming event dates.
 
@@ -212,7 +212,7 @@ def search_event(query: Optional[str] = None, date: Optional[str] = None, price:
 
 
 
-    results = new_event_collection.aggregate(pipeline).to_list(length=None)
+    results = await event_collection.aggregate(pipeline).to_list(length=None)
     full_res = []
     res = []
     
@@ -226,8 +226,9 @@ def search_event(query: Optional[str] = None, date: Optional[str] = None, price:
 
     return full_res
 
-@tool
-def search_tool(
+
+
+async def search_tool(
     query: Annotated[Optional[str], 'The query of the user if no query then return " " '] = "",
     city: Annotated[Optional[str], 'City of the user (has to be an actual city) if no city then return " " '] ="",
     price: Annotated[Optional[str], "It can be 'under max price', 'above min price', 'min price - max price' if no price then return ' ' "] = "",
@@ -262,7 +263,7 @@ def search_tool(
         end_date = current_date + relativedelta(months=12)
         date = f"{current_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
 
-    full_res = search_event(query=query, date=date, price=price, top_rated=top_rated)
+    full_res = await search_event(query=query, date=date, price=price, top_rated=top_rated)
     
 
     # Sort and filter
@@ -276,11 +277,6 @@ def search_tool(
     else:
         final_results = full_res
 
-    # Keep only important keys
-    important_keys = [
-        'event_name', 'event_date', 'event_time', 'theater_name',
-        'theater_address', 'cost', 'genre', 'city'
-    ]
 
     # Convert to Markdown string
     markdown_output = "### 🎟 Upcoming Events\n\n"
@@ -330,9 +326,39 @@ def search_tool(
 #         logger.error("Could not import LLM. Please ensure llm.py is available with __llm defined.")
 #         return None
 
+class SaleSearchInput(BaseModel):
+    query: Annotated[Optional[str], 'The query of the user if no query then return " " '] = ""
+    city: Annotated[Optional[str], 'City of the user (has to be an actual city) if no city then return " " '] =""
+    price: Annotated[Optional[str], "It can be 'under max price', 'above min price', 'min price - max price' if no price then return ' ' "] = ""
+    date: Annotated[Optional[str], "date (string, optional) – Event date (YYYY-MM-DD) or (YYYY-MM-DD to YYYY-MM-DD) if no date then return ' ' "]= ""
+    top_rated: Annotated[Optional[bool], "Whether we want top rated events or not, if no top_rated then return boolean False"] = False
+   
+
+class SaleSearchTool(BaseTool):
+    name: str = "search_tool"
+    description: str = (
+        "Use this tool whenever the user is looking for events, activities, or things to do — "
+        "whether directly asking for event suggestions, expressing boredom, or showing interest in going out. "
+        "It helps find relevant events based on user preferences like location, date, price range, and popularity."
+    )
+    args_schema: Type[BaseModel] = SaleSearchInput
+    return_direct: bool = True
+
+    def _run(self, query: str, city: str, price: str, date: str, top_rated: bool) -> Dict[str, Any]:
+        return search_tool.invoke({
+            "query": query,
+            "city": city,
+            "price": price,
+            "date": date,
+            "top_rated": top_rated
+        })
+
+sales_tool = SaleSearchTool()
+
+
 sale_agent = agent = initialize_agent(
     llm=__llm,
-    tools=[search_tool],  # if needed
+    tools=[sales_tool],  # if needed
     agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     handle_parsing_errors=True,
@@ -351,6 +377,7 @@ async def sale_agent_answer(query : str):
 
 def get_answer(query):
     return asyncio.run(sale_agent_answer(query=query))
+
 
 if __name__ == "__main__":
     def main():
@@ -373,7 +400,3 @@ if __name__ == "__main__":
             print(ans)
             
     main()
-
-
-
-   
