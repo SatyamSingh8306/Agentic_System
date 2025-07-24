@@ -876,5 +876,9 @@ Follow these strict rules:
 
 8. Never blend branches or respond with both options. Only one output path should be followed based on logic evaluation.
 
+9. You might have to filter the results based on user query. Always make sure that your answers are factually true. Do not put out anything that isn't factual or goes against the user query.
+
+10. Always explain your response and provide the reasoning for your response.
+
 Be concise, clear, and always respect conditional reasoning. You must behave like a decision engine, not a language rephraser.
 """

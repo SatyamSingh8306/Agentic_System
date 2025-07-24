@@ -3,11 +3,12 @@ from fastapi.responses import JSONResponse
 from fastapi import Body
 from langchain.schema.runnable import RunnableConfig
 #from agents.supervisor import graph
-from agents.main_agent import graph
+# from agents.main_agent import graph
+from agents.main_agent_copy import graph
 from langgraph.checkpoint.memory import MemorySaver
 from typing import Dict,Any
 from langchain_core.messages import HumanMessage, AIMessage
-
+import logging
 router = APIRouter()
 
 from pydantic import BaseModel
@@ -29,7 +30,8 @@ async def chat_agentic_system(request: ChatMessage = Body(...)):
     lc_messages = []
     user_id = request.userid
     user_query = request.user_query
-    
+    logging.info(f"User id: {user_id}")
+    logging.info(f"User query: {user_query}")
     for msg in user_query.messages:
         if msg.role == "user":
             lc_messages.append(HumanMessage(content=msg.content))

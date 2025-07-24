@@ -38,7 +38,7 @@ async def retrieve(query : Annotated[Optional[str], "The formatted best query to
     """retrieving data from vector database"""
     request =  {
         "query": query,
-        "collection": "mochand",
+        "collection": "instamart",
         "top_k": 5
         }
     ans = await client.post(url=CHAT_URL,json=request)
@@ -65,7 +65,7 @@ async def retrieve(query : Annotated[Optional[str], "The formatted best query to
 
 if __name__ == "__main__":
     async def main():
-        response = await retrieve("Privacy policy of mochand")
+        response = await retrieve("Refund policy")
         print(response)
     
     import asyncio

@@ -1,21 +1,14 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 import logging
 import asyncio
-import json
-from typing import List, Dict, Any, Optional, Annotated, Type
-from langchain_ollama import OllamaEmbeddings
-import re
-from dateutil.relativedelta import relativedelta
-from redis import Redis
-from langchain.agents import initialize_agent, AgentType
+from typing import Optional, Annotated, Type
+# from langchain_ollama import OllamaEmbeddings
 from pydantic import BaseModel
 from langchain_core.tools import BaseTool
 from langchain.tools import tool
 from langchain_openai.embeddings import OpenAIEmbeddings
 import re
-from pymongo import DESCENDING
 import logging
-import agents.system_prompts as sp
 from dotenv import load_dotenv, find_dotenv
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -24,13 +17,13 @@ load_dotenv(find_dotenv())
 from os import getenv
 
 
-embedding_model = OllamaEmbeddings(model="bge-m3", base_url = getenv("OLLAMA_BASE_URL"))
-# embedding_model = OpenAIEmbeddings()
+# embedding_model = OllamaEmbeddings(model="bge-m3", base_url = getenv("OLLAMA_BASE_URL"))
+embedding_model = OpenAIEmbeddings()
 similarity_threshold = 0.7
 
 client = AsyncIOMotorClient(getenv('DB'))
 db = client['event_db']
-instamart_collection = db['instamart_collection']
+instamart_collection = db['instamart']
 
 class SaleSearchInput(BaseModel):
     query: Annotated[Optional[str], 'The query of the user if no query then return " " '] = None
@@ -62,7 +55,7 @@ async def get_products(sale_inputs: SaleSearchInput):
                     "path": "embedding",
                     "numCandidates": 1000,
                     "limit": 10,
-                    "index": "instamart_index"
+                    "index": "instadex"
                 }
             }
         ])
@@ -132,7 +125,7 @@ async def get_products(sale_inputs: SaleSearchInput):
         if not results:
             logging.warning("Aggregation returned no results")
     
-
+        logging.info(f"Results with score: {results}")
         output = "\n".join(
             f"- {item['name']} ({item['weight']}) - ₹{item['price']}" for item in results
         )
@@ -178,7 +171,7 @@ sales_tool = InstamartSearchTool()
 
 if __name__ == "__main__":
     async def main():
-        products = await get_products({"query":"cucumber"})
+        products = await get_products({"query":"low oxalate"})
         print(products)
 
     asyncio.run(main())

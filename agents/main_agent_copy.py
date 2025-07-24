@@ -150,7 +150,7 @@ if __name__ == "__main__":
         print("Starting the agent...")
         ans = await app.ainvoke({
             "messages": [
-                HumanMessage(content="""Find broccoli. Agar broccoli out of stock ho toh koi accha alternative suggest kar do for pasta, please?"""),
+                HumanMessage(content="""Kal raat tumhare Instamart se laayi sabzi khane ke baad family ko food poisoning ho gaya. Kya refund milega? Aur doctor nearby recommend karo who’s available now, in delhi."""),
             ]})
         print(ans["messages"][-1].content)
         # print(ans)
