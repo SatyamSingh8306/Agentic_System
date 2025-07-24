@@ -2,13 +2,13 @@ from langgraph.graph import StateGraph, add_messages, END
 from langchain_ollama import ChatOllama
 from .rag_agent import retrieve, rag_tool
 from agents.web_agent import web_search, web_tool
-from agents.sale_agent import search_tool, sales_tool
+from agents.instamart_sale_tool import sales_tool, get_products
 import asyncio
 from functools import partial
 from datetime import datetime
 import agents.system_prompts as sp
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage
 from .llm import __llm, ___llm
 from dotenv import load_dotenv
 from os import getenv
@@ -20,14 +20,14 @@ logging.basicConfig(level=logging.INFO)
 
 def get_mochand_prompt():
     return ChatPromptTemplate.from_messages([
-        ("system", f"{sp.modified_sale_system_prompt} Today's date is {datetime.now().strftime("%Y-%m-%d")}"),
+        ("system", f"{sp.instamart_sales_prompt} Today's date is {datetime.now().strftime("%Y-%m-%d")}"),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}")
     ])
 
 def get_boss_prompt():
     return ChatPromptTemplate.from_messages([
-        ("system", f"{sp.modified_boss_system_prompt} Today's date is {datetime.now().strftime('%Y-%m-%d')}"),
+        ("system", f"{sp.instamart_boss_prompt} Today's date is {datetime.now().strftime('%Y-%m-%d')}"),
         # MessagesPlaceholder(variable_name="chat_history"),
         ("human", "Human Query : {input} \n Tool Results : {tool_result}")
     ])
@@ -75,16 +75,12 @@ async def splitter(state: BaseState):
         for tool_call in messages.tool_calls:
             tool_name = tool_call.get("name")
 
-            if tool_name == "search_tool":
+            if tool_name == "instamart_product_search":
                 search_query = tool_call.get("args", {})
-                query = search_query.get("query", "")
-                city = search_query.get("city", "")
-                price = search_query.get("price", "")
-                date = search_query.get("date", "")
-                top_rated = search_query.get("top_rated", False)
+                logging.info(f"Search query instamart: {search_query}")
 
                 tasks.append(asyncio.create_task(
-                    search_tool(query, city, price, date, top_rated)
+                    get_products(search_query)
                 ))
 
             elif tool_name == "web_search":
@@ -154,7 +150,7 @@ if __name__ == "__main__":
         print("Starting the agent...")
         ans = await app.ainvoke({
             "messages": [
-                HumanMessage(content="""Managing events in Thar Desert but need comprehensive safety planning. Research on desert survival protocols for large groups, contact info for specialized rescue services, information about communication systems that work in remote areas, and backup plans for extreme weather conditions"""),
+                HumanMessage(content="""Find broccoli. Agar broccoli out of stock ho toh koi accha alternative suggest kar do for pasta, please?"""),
             ]})
         print(ans["messages"][-1].content)
         # print(ans)
